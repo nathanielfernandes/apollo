@@ -18,21 +18,21 @@ async def fortune(req: Request):
     identifier = req.headers.get("X-Forwarded-For", req.client.host)
     currentday = datetime.now().day
 
-    if history.get(identifier, -1) == currentday:
-        return {
-            "fortune": "You already got your fortune today, come back tomorrow!",
-            "numbers": [],
-        }
-
-    history[identifier] = currentday
+    h = history.get(identifier, None)
+    if h is not None and h["last"] == currentday:
+        return h["data"]
 
     print(f"Generating fortune for {identifier}...")
     fortune, catalyst = await generate_fortune()
     numbers = get_lucky_numbers()
     print(f"Fortune for {identifier} 🔮: {fortune}")
 
-    return {
+    data = {
         "fortune": fortune,
         "numbers": numbers,
         "theme": catalyst,
     }
+
+    history[identifier] = {"last": currentday, "data": data}
+
+    return data
