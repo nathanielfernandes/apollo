@@ -1,10 +1,18 @@
 from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from apollo import generate_fortune, get_lucky_numbers
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET"],
+    allow_headers=["X-Forwarded-For"],
+)
+
 history = {}
 
 
