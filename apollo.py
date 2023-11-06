@@ -41,9 +41,10 @@ async def generate_fortune():
         print(f"Generated Fortune Cost: ${total:.6f}")
 
         return completion.choices[0].message.content, catalyst
-    except Exception:
+    except Exception as e:
         print("Error generating fortune :(")
-        return "No fortune for you >:)", "No catalyst for you >:)"
+        print(e)
+        return None, None
 
 
 async def generate_image(prompt: str) -> str:
@@ -53,9 +54,10 @@ async def generate_image(prompt: str) -> str:
         )
         print("Generated Image Cost: $0.04")
         return response.data[0].url
-    except Exception:
+    except Exception as e:
         print("Error generating Image :(")
-        return "No fortune for you >:)"
+        print(e)
+        return None
 
 
 # completion = (

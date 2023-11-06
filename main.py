@@ -42,7 +42,8 @@ async def image(req: Request):
     prompt = data["fortune"]
     img = await generate_image(prompt)
 
-    data["image"] = img
+    if img is not None:
+        data["image"] = img
 
     return img
 
