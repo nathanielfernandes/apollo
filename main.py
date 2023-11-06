@@ -36,8 +36,10 @@ async def image(req: Request):
 
     data = await gen_fortune(identifier, currentday)
 
-    if (img := data.get("image")) is not None:
-        return img
+    if data.get("image_ready", False):
+        return data.get("image")
+
+    data["image_ready"] = True
 
     prompt = data["fortune"]
     img = await generate_image(prompt)
@@ -62,6 +64,8 @@ async def gen_fortune(identifier: str, currentday: int):
         "fortune": fortune,
         "numbers": numbers,
         "theme": catalyst,
+        "image": None,
+        "image_ready": False,
     }
 
     history[identifier] = {"last": currentday, "data": data}
