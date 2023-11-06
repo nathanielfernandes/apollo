@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from apollo import generate_fortune, get_lucky_numbers
+from apollo import generate_fortune, get_lucky_numbers, generate_image
 
 app = FastAPI()
 app.add_middleware(
@@ -26,6 +26,28 @@ async def fortune(req: Request):
     identifier = req.headers.get("X-Forwarded-For", req.client.host)
     currentday = datetime.now().day
 
+    return await gen_fortune(identifier, currentday)
+
+
+@app.get("/fortune/image")
+async def image(req: Request):
+    identifier = req.headers.get("X-Forwarded-For", req.client.host)
+    currentday = datetime.now().day
+
+    data = await gen_fortune(identifier, currentday)
+
+    if (img := data.get("image")) is not None:
+        return img
+
+    prompt = data["fortune"]
+    img = await generate_image(prompt)
+
+    data["image"] = img
+
+    return img
+
+
+async def gen_fortune(identifier: str, currentday: int):
     h = history.get(identifier, None)
     if h is not None and h["last"] == currentday:
         return h["data"]
