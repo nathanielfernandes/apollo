@@ -124,6 +124,9 @@ async def parse_vowels(text: str) -> VowelCount:
                 {"role": "user", "content": text},
             ],
             text_format=VowelCount,
+            reasoning=False,
+            max_output_tokens=128,
+            max_tool_calls=0,
         )
         
         # Cache the result with current timestamp
