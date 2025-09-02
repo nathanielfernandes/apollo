@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from openai import AsyncOpenAI
 import random
 
@@ -88,5 +89,32 @@ async def generate_image(prompt: str) -> str:
         return response.data[0].url
     except Exception as e:
         print("Error generating Image :(")
+        print(e)
+        return None
+
+class VowelCount(BaseModel):
+    a: int
+    e: int
+    i: int
+    o: int
+    u: int
+    total: int
+
+async def parse_vowels(text: str) -> VowelCount:
+    try:
+        completion = await client.responses.parse(
+            model="gpt-5-nano",
+            input=[
+                {
+                    "role": "system",
+                    "content": f"Extract the number of each vowel (a, e, i, o, u) and the total count of vowels.",
+                },
+                {"role": "user", "content": text},
+            ],
+            text_format=VowelCount,
+        )
+        return completion.output_parsed
+    except Exception as e:
+        print("Error counting vowels :(")
         print(e)
         return None

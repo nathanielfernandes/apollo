@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from apollo import generate_fortune, get_lucky_numbers, generate_image
+from apollo import generate_fortune, get_lucky_numbers, generate_image, parse_vowels
 
 app = FastAPI()
 app.add_middleware(
@@ -71,3 +71,19 @@ async def gen_fortune(identifier: str, currentday: int):
     history[identifier] = {"last": currentday, "data": data}
 
     return data
+
+@app.get("/vowels")
+async def vowels(req: Request):
+    text = req.query_params.get("text", "")
+    if not text:
+        return {"error": "Please provide text query parameter."}
+
+    # only accept a max of 512 characters
+    if len(text) > 512:
+        return {"error": "Text query parameter must be at most 512 characters."}
+
+    counts = await parse_vowels(text)
+    if counts is None:
+        return {"error": "Error counting vowels."}
+
+    return counts
