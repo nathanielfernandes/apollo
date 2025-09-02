@@ -1,8 +1,12 @@
 from pydantic import BaseModel
 from openai import AsyncOpenAI
 import random
+import time
 
 client = AsyncOpenAI()
+
+# Cache for vowel parsing (stores results for 3 hours)
+vowel_cache = {}
 
 fortune_words = []
 with open("catalysts.txt", "r") as f:
@@ -101,6 +105,14 @@ class VowelCount(BaseModel):
     total: int
 
 async def parse_vowels(text: str) -> VowelCount:
+    cache_key = text
+    current_time = time.time()
+    
+    if cache_key in vowel_cache:
+        cached_result, timestamp = vowel_cache[cache_key]
+        if current_time - timestamp < 10800:
+            return cached_result
+    
     try:
         completion = await client.responses.parse(
             model="gpt-5-nano",
@@ -113,7 +125,12 @@ async def parse_vowels(text: str) -> VowelCount:
             ],
             text_format=VowelCount,
         )
-        return completion.output_parsed
+        
+        # Cache the result with current timestamp
+        result = completion.output_parsed
+        vowel_cache[cache_key] = (result, current_time)
+        
+        return result
     except Exception as e:
         print("Error counting vowels :(")
         print(e)
