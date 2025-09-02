@@ -119,17 +119,13 @@ async def parse_vowels(text: str) -> VowelCount:
             input=[
                 {
                     "role": "system",
-                    "content": f"Extract the number of each vowel (a, e, i, o, u) and the total count of vowels.",
+                    "content": f"Count the number of vowels.",
                 },
                 {"role": "user", "content": text},
             ],
             text_format=VowelCount,
-            reasoning=False,
-            max_output_tokens=128,
-            max_tool_calls=0,
         )
         
-        # Cache the result with current timestamp
         result = completion.output_parsed
         vowel_cache[cache_key] = (result, current_time)
         
